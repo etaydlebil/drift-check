@@ -31,6 +31,19 @@ func CompareManifests(live, expected string) (Result, error) {
 	return Result{HasDrift: true, Details: diff}, nil
 }
 
+// Summary returns a short human-readable summary of the result. If there is no
+// drift it returns an empty string, otherwise it returns the first line of the
+// diff details so callers can display a concise message without the full diff.
+func (r Result) Summary() string {
+	if !r.HasDrift {
+		return ""
+	}
+	if idx := strings.Index(r.Details, "\n"); idx != -1 {
+		return r.Details[:idx]
+	}
+	return r.Details
+}
+
 // normalise strips trailing whitespace from each line and ensures the string
 // ends with a single newline so that cosmetic differences are ignored.
 func normalise(s string) string {
