@@ -1,41 +1,35 @@
 package output
 
-import (
-	"fmt"
-	"strings"
-	"time"
-)
+import "fmt"
 
-// Summary holds the result of a drift-check run.
+// Summary holds the high-level result of a drift-check run.
 type Summary struct {
 	Release   string
 	Namespace string
-	Drifted   bool
+	HasDrift  bool
 	Diff      string
-	Error     error
-	CheckedAt time.Time
+	Err       error
 }
 
-// NewSummary constructs a Summary for the given release.
-func NewSummary(release, namespace, diff string, err error) Summary {
-	return Summary{
+// NewSummary constructs a Summary from the outputs of a drift run.
+func NewSummary(release, namespace, diff string, err error) *Summary {
+	return &Summary{
 		Release:   release,
 		Namespace: namespace,
-		Drifted:   diff != "",
+		HasDrift:  diff != "",
 		Diff:      diff,
-		Error:     err,
-		CheckedAt: time.Now().UTC(),
+		Err:       err,
 	}
 }
 
-// StatusLine returns a single human-readable status string.
-func (s Summary) StatusLine() string {
-	if s.Error != nil {
-		return fmt.Sprintf("ERROR release=%s namespace=%s error=%v", s.Release, s.Namespace, s.Error)
+// StatusLine returns a single human-readable status line suitable for
+// printing to a terminal.
+func (s *Summary) StatusLine() string {
+	if s.Err != nil {
+		return fmt.Sprintf("[ERROR] %s/%s — %v", s.Namespace, s.Release, s.Err)
 	}
-	if s.Drifted {
-		lines := len(strings.Split(strings.TrimSpace(s.Diff), "\n"))
-		return fmt.Sprintf("DRIFT release=%s namespace=%s changed_lines=%d", s.Release, s.Namespace, lines)
+	if s.HasDrift {
+		return fmt.Sprintf("[DRIFT] %s/%s — configuration drift detected", s.Namespace, s.Release)
 	}
-	return fmt.Sprintf("OK release=%s namespace=%s", s.Release, s.Namespace)
+	return fmt.Sprintf("[OK]    %s/%s — no drift detected", s.Namespace, s.Release)
 }
