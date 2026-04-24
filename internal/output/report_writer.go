@@ -13,6 +13,9 @@ const (
 	FormatJSON Format = "json"
 )
 
+// SupportedFormats lists all valid output formats.
+var SupportedFormats = []Format{FormatText, FormatJSON}
+
 // ReportWriter writes a drift report in the requested format to w.
 type ReportWriter struct {
 	format Format
@@ -43,4 +46,17 @@ func (r *ReportWriter) Write(s *Summary) error {
 // Format returns the configured output format.
 func (r *ReportWriter) Format() Format {
 	return r.format
+}
+
+// ParseFormat converts a raw string into a Format, returning an error if the
+// value is not recognised. This is useful when reading format flags from CLI
+// arguments or configuration files.
+func ParseFormat(s string) (Format, error) {
+	f := Format(s)
+	for _, supported := range SupportedFormats {
+		if f == supported {
+			return f, nil
+		}
+	}
+	return "", fmt.Errorf("unsupported format %q: choose \"text\" or \"json\"", s)
 }
