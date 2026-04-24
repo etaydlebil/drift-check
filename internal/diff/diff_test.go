@@ -59,3 +59,19 @@ func TestCompareManifests_EmptyInputs(t *testing.T) {
 		t.Error("two empty strings should produce no drift")
 	}
 }
+
+func TestCompareManifests_AddedField(t *testing.T) {
+	// Simulate a live manifest that has an extra annotation not present in the desired state.
+	live := strings.Replace(baseManifest, "  name: my-app", "  name: my-app\n  annotations:\n    managed-by: helm", 1)
+
+	result, err := CompareManifests(live, baseManifest)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !result.HasDrift {
+		t.Error("expected drift due to added annotation but none was detected")
+	}
+	if !strings.Contains(result.Details, "managed-by") {
+		t.Errorf("diff details missing added field; got: %s", result.Details)
+	}
+}
