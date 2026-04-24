@@ -60,8 +60,6 @@ func (f *Formatter) writeText(r Result) error {
 }
 
 func (f *Formatter) writeJSON(r Result) error {
-	diffEscaped := strings.ReplaceAll(r.Diff, `"`, `\"`)
-	diffEscaped = strings.ReplaceAll(diffEscaped, "\n", `\n`)
 	hasDrift := "false"
 	if r.HasDrift {
 		hasDrift = "true"
@@ -72,4 +70,14 @@ func (f *Formatter) writeJSON(r Result) error {
 	)
 	_, err := fmt.Fprintln(f.w, json)
 	return err
+}
+
+// WriteAll writes multiple Results sequentially, stopping on the first error.
+func (f *Formatter) WriteAll(results []Result) error {
+	for _, r := range results {
+		if err := f.Write(r); err != nil {
+			return fmt.Errorf("writing result for %s/%s: %w", r.Namespace, r.Release, err)
+		}
+	}
+	return nil
 }
