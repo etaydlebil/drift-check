@@ -52,3 +52,18 @@ func TestWriteTable_HeaderAlwaysPresent(t *testing.T) {
 		t.Errorf("expected header in all outputs, got: %s", buf.String())
 	}
 }
+
+func TestWriteTable_ReleaseAndNamespaceInOutput(t *testing.T) {
+	s := Summary{Release: "frontend", Namespace: "production", Drift: "", Error: ""}
+	var buf bytes.Buffer
+	if err := WriteTable(&buf, s); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	out := buf.String()
+	if !strings.Contains(out, "frontend") {
+		t.Errorf("expected release name in output, got: %s", out)
+	}
+	if !strings.Contains(out, "production") {
+		t.Errorf("expected namespace in output, got: %s", out)
+	}
+}
