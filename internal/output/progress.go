@@ -51,3 +51,14 @@ func (p *ProgressWriter) Write(ev ProgressEvent) {
 	}
 	fmt.Fprintf(p.w, "[%s] %s %s\n", ev.Timestamp.Format(time.RFC3339), status, ev.Stage)
 }
+
+// NewEvent is a convenience constructor that stamps the current time onto a
+// ProgressEvent, reducing boilerplate at call sites.
+func NewEvent(stage Stage, done bool, err error) ProgressEvent {
+	return ProgressEvent{
+		Stage:     stage,
+		Done:      done,
+		Err:       err,
+		Timestamp: time.Now(),
+	}
+}
