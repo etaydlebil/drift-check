@@ -87,3 +87,24 @@ func TestFormatter_JSONWithDrift(t *testing.T) {
 		t.Errorf("expected has_drift:true in JSON output, got: %q", got)
 	}
 }
+
+func TestFormatter_TextIncludesReleaseAndNamespace(t *testing.T) {
+	var buf strings.Builder
+	f := output.NewFormatter(&buf, output.FormatText)
+	err := f.Write(output.Result{
+		Release:   "frontend",
+		Namespace: "qa",
+		HasDrift:  false,
+		Diff:      "",
+	})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	got := buf.String()
+	if !strings.Contains(got, "frontend") {
+		t.Errorf("expected release name in output, got: %q", got)
+	}
+	if !strings.Contains(got, "qa") {
+		t.Errorf("expected namespace in output, got: %q", got)
+	}
+}
