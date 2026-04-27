@@ -68,3 +68,14 @@ func (s *Snapshot) DriftedCount() int {
 	}
 	return count
 }
+
+// DriftedResults returns only the results that have non-empty diffs.
+func (s *Snapshot) DriftedResults() []compare.DriftResult {
+	var drifted []compare.DriftResult
+	for _, r := range s.Results {
+		if r.Diff != "" {
+			drifted = append(drifted, r)
+		}
+	}
+	return drifted
+}
